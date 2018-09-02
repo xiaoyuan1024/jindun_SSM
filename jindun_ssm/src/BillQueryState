@@ -1,0 +1,3 @@
+RecordDao中
+	queryRecordByArrivalTime()方法->根据消费时间模糊查询详细通行记录
+		ArrivalTime 即 消费时间

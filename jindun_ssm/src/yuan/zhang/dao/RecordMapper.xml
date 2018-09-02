@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yuan.zhang.dao.RecordDao">
+	<select id="getRecordCurrentPage"
+		resultType="yuan.zhang.entity.Record">
+		<!-- XML 中仅有字符 “<”和”&” 是非法的 ，使用<![CDATA[ ]]> -->
+		<!-- 获取当前页面中所有通行记录(传入参数startTime得在之前做截取处理) -->
+		select * from (select rownum r,t.* from (select s.* from
+		(select * from
+		Record where starttime like '%${startTime}%' and
+		LTID=(select LTID from
+		userinformation where username=#{username})) s
+		order by starttime asc )
+		t where rownum <![CDATA[ <= ]]>
+		(#{currentPage} *
+		#{pageSize})) where r>=
+		((#{currentPage} - 1) *
+		(#{pageSize} + 1))
+	</select>
+
+	<select id="getTotalCount" resultType="int">
+		<!-- 获取数据总条数(传入参数startTime得在之前做截取处理) -->
+		select count(1) count from (select * from Record where starttime like
+		'%${startTime}%' and LTID=(select LTID from userinformation where
+		username=#{username}))
+	</select>
+
+	<select id="queryRecordByPlateUsername"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 按照用户名和车牌号查询 -->
+		select * from record where LTID=(select LTID from userinformation
+		where username=#{username}) and plate=#{plate}
+	</select>
+
+	<select id="queryRecordByStartTime"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 按结算时间查询 -->
+<!-- 		select * from record where plate = #{plate} and starttime=(select
+		starttime from record where (starttime between
+		to_date('${startTimeScope}','yyyy-mm-dd') and
+		to_date('${endTimeScope}','yyyy-mm-dd')) and
+		LTID = (select LTID from
+		record where username=#{username})) -->
+		select * from record where plate = #{plate} and
+		LTID = #{LTID} and starttime like '%${startTimeScope}%' or starttime like '%${endTimeScope}%'
+		<!-- between
+		to_date('${startTimeScope}','yyyy-mm-dd') and
+		to_date('${endTimeScope}','yyyy-mm-dd') -->
+	</select>
+
+	<select id="queryRecordByArrivalTime"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 按照消费时间查询 -->
+		select * from record where plate = #{plate} and
+		LTID = #{LTID} and arrivaltime like '%${startTimeScope}%' or arrivaltime like '%${endTimeScope}%'
+		
+<!-- 		to_date('${startTimeScope}','yyyy-mm-dd') and
+		to_date('${endTimeScope}','yyyy-mm-dd') -->
+	</select>
+
+	<select id="queryRecordByMonStartTime"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 月份查询：按消费时间(startTime)查询 -->
+		select * from record where LTID=(select LTID from userinformation
+		where username = #{username}) and plate = #{plate} and starttime like
+		'%${Mouth}%'
+	</select>
+
+	<select id="queryRecordByMonArrivalTime"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 月份查询：按结算时间(arrivalTime)查询 -->
+		select * from record where LTID=(select LTID from userinformation
+		where username = #{username}) and plate = #{plate} and arrivaltime
+		like '%${Mouth}%'
+	</select>
+
+	<select id="selectRecord" parameterType="string"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 用户信息界面：根据用户名查询通行记录数据显示 -->
+		select plate,sum(monetary) sum from record where LTID=(select LTID
+		from userinformation where username = #{username}) group by plate
+	</select>
+
+	<select id="selectByPlate" parameterType="string"
+		resultType="yuan.zhang.entity.Record">
+		<!-- 用户信息界面：点击查询，按照车牌号码查询 -->
+		select * from record where plate = #{plate}
+	</select>
+</mapper>

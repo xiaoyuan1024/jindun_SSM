@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="yuan.zhang.dao.UserDao">
+	<select id="findUserByusername" parameterType="string"
+		resultType="yuan.zhang.entity.User">
+		<!-- 根据用户名查找用户 -->
+		select * from userinformation where username = #{username}
+	</select>
+	<!-- 修改和插入没有输出参数 -->
+	<update id="updateUser"  >
+		<!--修改用户信息 -->
+		update userinformation set username = #{user.username},password = #{user.password} where username= #{username}
+	</update>
+	<insert id="addUser" parameterType="yuan.zhang.entity.User">
+		<!-- 注册用户信息 -->
+		insert into userinformation values(#{username},#{password},#{LTID})
+	</insert>
+</mapper>
